@@ -11,37 +11,25 @@ namespace SmallTweak_Hydra.PATCHES
         public static int GetNumberOfTribesInDeck()
         {
             List<CardInfo> list = new List<CardInfo>(RunState.Run.playerDeck.Cards);
-            list.Sort((CardInfo a, CardInfo b) => a.tribes.Count - b.tribes.Count);
-            
-            // Create a dict of tribes including modded {HOPEFULLY}
-            List<Tribe> dict = new List<Tribe>();
-            for (int count = 1; count <= (int)Tribe.NUM_TRIBES; count++)
+            list.Sort((a, b) => a.tribes.Count - b.tribes.Count);
+            HashSet<Tribe> uniqueTribes = new HashSet<Tribe>();
+
+            foreach (CardInfo card in list)
             {
-                Tribe tribe = (Tribe)count;
-                if (tribe == Tribe.NUM_TRIBES || tribe == Tribe.None)
+                if (card.HasAbility(Ability.HydraEgg))
                 {
                     continue;
                 }
-                dict.Add(tribe);
-            }
-            
-            // Make a Handler for determining if tribe is Unique.
-            List<Tribe> newDict = new List<Tribe>();
-            for (int count = 0; count <= 5; count++)
-            {
-                foreach (CardInfo cardInfo in list)
+                foreach (Tribe tribe in card.tribes)
                 {
-                    int i = cardInfo.tribes.Count;
-                    if (cardInfo.IsOfTribe(dict[i]) && !newDict.Contains(dict[i]))
+                    if (tribe != Tribe.None)
                     {
-                        newDict.Add(dict[i]);
-                        count++;
+                        uniqueTribes.Add(tribe);
                     }
                 }
             }
-            
-            // Return our proper count.
-            return newDict.Count;
+
+            return uniqueTribes.Count;
         }
 
         // Make a Handler for Health
@@ -51,9 +39,13 @@ namespace SmallTweak_Hydra.PATCHES
             List<int> health = new List<int>();
             
             // Fill the Health list
-            list.Sort((CardInfo a, CardInfo b) => a.Health - b.Health);
+            list.Sort((a, b) => a.Health - b.Health);
             foreach (CardInfo currentCard in list)
             {
+                if (currentCard.HasAbility(Ability.HydraEgg))
+                {
+                    continue;
+                }
                 if (!health.Contains(currentCard.Health))
                 {
                     health.Add(currentCard.Health);
@@ -70,9 +62,13 @@ namespace SmallTweak_Hydra.PATCHES
             List<int> power = new List<int>();
             
             // Fill the Power List
-            list.Sort((CardInfo a, CardInfo b) => a.Attack - b.Attack);
+            list.Sort((a, b) => a.Attack - b.Attack);
             foreach (CardInfo currentCard in list)
             {
+                if (currentCard.HasAbility(Ability.HydraEgg))
+                {
+                    continue;
+                }
                 if (!power.Contains(currentCard.Attack))
                 {
                     power.Add(currentCard.Attack);
@@ -86,7 +82,7 @@ namespace SmallTweak_Hydra.PATCHES
         public static bool PrefixRespondsToDrawn(ref bool __result)
         {
             // Health/Power Handler
-            if (GetHealthNum() <= 5 || GetPowerNum() <= 5)
+            if (GetHealthNum() < 5 || GetPowerNum() < 5)
             {
                 __result = false;
                 return false;

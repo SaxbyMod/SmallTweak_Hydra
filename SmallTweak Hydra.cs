@@ -6,6 +6,7 @@ using HarmonyLib;
 namespace SmallTweak_Hydra
 {
     [BepInPlugin(PluginGuid, PluginName, PluginVersion)]
+    [BepInDependency("cyantist.inscryption.api")]
     public class SmallTweak_Hydra : BaseUnityPlugin
     {
         // --------------------------------------------------------------------------------------------------------------------------------------------------
@@ -26,6 +27,7 @@ namespace SmallTweak_Hydra
         {
             harmony.PatchAll(typeof(HydraPatches));
             harmony.PatchAll(typeof(HydraPortraitPatches));
+            harmony.PatchAll(typeof(HydraRulebookPatches));
             Logger.LogMessage($"{PluginGuid}: Loaded Mod: {PluginName} - {PluginVersion}");
         }
     }
