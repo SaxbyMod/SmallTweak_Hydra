@@ -5,6 +5,7 @@ using HarmonyLib;
 
 namespace SmallTweak_Hydra
 {
+    [BepInPlugin(PluginGuid, PluginName, PluginVersion)]
     public class SmallTweak_Hydra : BaseUnityPlugin
     {
         // --------------------------------------------------------------------------------------------------------------------------------------------------
@@ -24,6 +25,7 @@ namespace SmallTweak_Hydra
         public void Awake()
         {
             harmony.PatchAll(typeof(HydraPatches));
+            harmony.PatchAll(typeof(HydraPortraitPatches));
             Logger.LogMessage($"{PluginGuid}: Loaded Mod: {PluginName} - {PluginVersion}");
         }
     }

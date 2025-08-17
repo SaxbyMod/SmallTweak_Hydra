@@ -7,9 +7,8 @@ namespace SmallTweak_Hydra.PATCHES
     [HarmonyPatch]
     internal static class HydraPatches
     {
-        // Patch for Tribe Num
-        [HarmonyPrefix, HarmonyPatch(typeof(HydraEgg), nameof(HydraEgg.GetNumTribesInDeck))]
-        public static int PrefixGetNumTribesInDeck(CardInfo card, ref bool __runOriginal)
+        // Make a new Tribe Handler
+        public static int GetNumberOfTribesInDeck()
         {
             List<CardInfo> list = new List<CardInfo>(RunState.Run.playerDeck.Cards);
             list.Sort((CardInfo a, CardInfo b) => a.tribes.Count - b.tribes.Count);
@@ -42,17 +41,14 @@ namespace SmallTweak_Hydra.PATCHES
             }
             
             // Return our proper count.
-            __runOriginal = false;
             return newDict.Count;
         }
-        
-        // Patch for Drawn Response
-        [HarmonyPrefix, HarmonyPatch(typeof(HydraEgg), nameof(HydraEgg.RespondsToDrawn))]
-        public static bool PrefixRespondsToDrawn(CardInfo card, ref bool __runOriginal)
+
+        // Make a Handler for Health
+        public static int GetHealthNum()
         {
             List<CardInfo> list = new List<CardInfo>(RunState.Run.playerDeck.Cards);
             List<int> health = new List<int>();
-            List<int> power = new List<int>();
             
             // Fill the Health list
             list.Sort((CardInfo a, CardInfo b) => a.Health - b.Health);
@@ -64,6 +60,15 @@ namespace SmallTweak_Hydra.PATCHES
                 }
             }
             
+            return health.Count;
+        }
+        
+        // Make a Handler for Power
+        public static int GetPowerNum()
+        {
+            List<CardInfo> list = new List<CardInfo>(RunState.Run.playerDeck.Cards);
+            List<int> power = new List<int>();
+            
             // Fill the Power List
             list.Sort((CardInfo a, CardInfo b) => a.Attack - b.Attack);
             foreach (CardInfo currentCard in list)
@@ -73,15 +78,22 @@ namespace SmallTweak_Hydra.PATCHES
                     power.Add(currentCard.Attack);
                 }
             }
-            
+
+            return power.Count;
+        }
+        
+        [HarmonyPrefix, HarmonyPatch(typeof(HydraEgg), nameof(HydraEgg.RespondsToDrawn))]
+        public static bool PrefixRespondsToDrawn(ref bool __result)
+        {
             // Health/Power Handler
-            if (health.Count <= 5 || power.Count <= 5)
+            if (GetHealthNum() <= 5 || GetPowerNum() <= 5)
             {
+                __result = false;
                 return false;
             }
             
-            __runOriginal = false;
-            return HydraEgg.GetNumTribesInDeck() >= 5;
+            __result = GetNumberOfTribesInDeck() >= 5;
+            return false;
         }
     }
 }
